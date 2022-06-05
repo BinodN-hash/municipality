@@ -2,9 +2,11 @@ package com.example.municipalityrestapi.controller;
 
 import com.example.municipalityrestapi.model.District;
 import com.example.municipalityrestapi.model.Municipality;
+import com.example.municipalityrestapi.model.Province;
 import com.example.municipalityrestapi.model.Ward;
 import com.example.municipalityrestapi.repository.DistrictRepository;
 import com.example.municipalityrestapi.repository.MunicipalityRepository;
+import com.example.municipalityrestapi.repository.ProvinceRepository;
 import com.example.municipalityrestapi.service.MunicipalityService;
 import lombok.RequiredArgsConstructor;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -21,11 +23,20 @@ public class MainController {
     private final MunicipalityService municipalityService;
     private final DistrictRepository districtRepository;
     private final MunicipalityRepository municipalityRepository;
+    private final ProvinceRepository provinceRepository;
+
+    @PostMapping("/province")
+    public ResponseEntity<Province> saveProvince(@RequestBody Province province){
+        return new ResponseEntity<>(municipalityService.saveProvince(province), HttpStatus.OK);
+    }
 
     @PostMapping("/district")
     public ResponseEntity<District> saveDistrict(@RequestBody District district){
-        return new ResponseEntity<>(municipalityService.saveDistrict(district), HttpStatus.OK);
+        Province province = provinceRepository.findByProvinceCode(district.getProvinceCode());
+        district.setProvince(province);
+        return new ResponseEntity<>(municipalityService.saveDistrict(district),HttpStatus.OK);
     }
+
 
     @PostMapping("/municipality")
     public ResponseEntity<Municipality> saveMunicipality(@RequestBody Municipality municipality){
@@ -44,8 +55,8 @@ public class MainController {
 
     @GetMapping("list")
     public ResponseEntity<?> listAll(){
-        List<District> districts = districtRepository.findAll();
-        return new ResponseEntity<>(districts, HttpStatus.OK);
+        List<Province> provinces = provinceRepository.findAll();
+        return new ResponseEntity<>(provinces, HttpStatus.OK);
     }
 
 
@@ -56,6 +67,13 @@ public class MainController {
 
     }
 
+    @GetMapping("province/{id}")
+    public ResponseEntity<Province> provinceById(@PathVariable Long id){
+        Province province = provinceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No data found of district, municipality & ward with district id: " + id));
+        return new ResponseEntity<>(province, HttpStatus.OK);
+
+    }
+
     @GetMapping("municipality/{id}")
     public ResponseEntity<Municipality> municipalictyById(@PathVariable Long id){
         Municipality municipality = municipalityRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Municipality Not Found with id: " + id));
@@ -63,6 +81,7 @@ public class MainController {
 
     }
 
-
-
 }
+
+
+

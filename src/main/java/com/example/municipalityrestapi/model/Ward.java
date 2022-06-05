@@ -18,7 +18,6 @@ public class Ward {
     private String wardCode;
     private String wardName;
 
-    @Transient
     private String municipalityCode;
 
     @JsonIgnore
